@@ -51,8 +51,8 @@ def start_server():
     btnStop.config(state=tk.NORMAL)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print socket.AF_INET
-    print socket.SOCK_STREAM
+    print(socket.AF_INET)
+    print(socket.SOCK_STREAM) 
 
     server.bind((HOST_ADDR, HOST_PORT))
     server.listen(5)  # server is listening for client connection
@@ -75,7 +75,6 @@ def accept_clients(the_server, y):
         if len(clients) < 2:
             client, addr = the_server.accept()
             clients.append(client)
-
             # use a thread so as not to clog the gui thread
             threading._start_new_thread(send_receive_client_message, (client, addr))
 
@@ -83,16 +82,17 @@ def accept_clients(the_server, y):
 # Send that message to other clients
 def send_receive_client_message(client_connection, client_ip_addr):
     global server, client_name, clients, player_data, player0, player1
-
     client_msg = " "
 
     # send welcome message to client
     client_name = client_connection.recv(4096)
     if len(clients) < 2:
-        client_connection.send("welcome1")
+	# encode() / decode() methods used to fix - TypeError: a bytes-like object is required, not 'str' 
+	# fix made for python3.x , cecked with python3.6 
+        client_connection.send("welcome1".encode())
     else:
-        client_connection.send("welcome2")
-
+        client_connection.send("welcome2".encode()) 
+    
     clients_names.append(client_name)
     update_client_names_display(clients_names)  # update client names display
 
@@ -100,8 +100,8 @@ def send_receive_client_message(client_connection, client_ip_addr):
         sleep(1)
 
         # send opponent name
-        clients[0].send("opponent_name$" + clients_names[1])
-        clients[1].send("opponent_name$" + clients_names[0])
+        clients[0].send("opponent_name$".encode() + clients_names[1]) 
+        clients[1].send("opponent_name$".encode() + clients_names[0]) 
         # go to sleep
 
     while True:
@@ -121,8 +121,8 @@ def send_receive_client_message(client_connection, client_ip_addr):
 
         if len(player_data) == 2:
             # send player 1 choice to player 2 and vice versa
-            player_data[0].get("socket").send("$opponent_choice" + player_data[1].get("choice"))
-            player_data[1].get("socket").send("$opponent_choice" + player_data[0].get("choice"))
+            player_data[0].get("socket").send("$opponent_choice".encode() + player_data[1].get("choice"))
+            player_data[1].get("socket").send("$opponent_choice".encode() + player_data[0].get("choice"))
 
             player_data = []
 
@@ -151,8 +151,8 @@ def get_client_index(client_list, curr_client):
 def update_client_names_display(name_list):
     tkDisplay.config(state=tk.NORMAL)
     tkDisplay.delete('1.0', tk.END)
-
     for c in name_list:
+        c = c.decode() 
         tkDisplay.insert(tk.END, c+"\n")
     tkDisplay.config(state=tk.DISABLED)
 

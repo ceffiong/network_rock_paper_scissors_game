@@ -1,3 +1,4 @@
+# encode() / decode() methods used for fixing TypeError - This is for adding compatibility with python3.6  
 
 import tkinter as tk
 from tkinter import PhotoImage
@@ -174,7 +175,7 @@ def choice(arg):
     lbl_your_choice["text"] = "Your choice: " + your_choice
 
     if client:
-        client.send("Game_Round"+str(game_round)+your_choice)
+        client.send("Game_Round".encode()+str(game_round).encode()+your_choice.encode()) 
         enable_disable_buttons("disable")
 
 
@@ -183,8 +184,7 @@ def connect_to_server(name):
     try:
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST_ADDR, HOST_PORT))
-        client.send(name) # Send name to server after connecting
-
+        client.send(name.encode()) # Send name to server after connecting
         # disable widgets
         btn_connect.config(state=tk.DISABLED)
         ent_name.config(state=tk.DISABLED)
@@ -207,16 +207,16 @@ def receive_message_from_server(sck, m):
 
         if not from_server: break
 
-        if from_server.startswith("welcome"):
-            if from_server == "welcome1":
+        if from_server.startswith("welcome".encode()):
+            if from_server == "welcome1".encode():
                 lbl_welcome["text"] = "Server says: Welcome " + your_name + "! Waiting for player 2"
-            elif from_server == "welcome2":
+            elif from_server == "welcome2".encode():
                 lbl_welcome["text"] = "Server says: Welcome " + your_name + "! Game will start soon"
             lbl_line_server.pack()
 
-        elif from_server.startswith("opponent_name$"):
-            opponent_name = from_server.replace("opponent_name$", "")
-            lbl_opponent_name["text"] = "Opponent: " + opponent_name
+        elif from_server.startswith("opponent_name$".encode()):
+            opponent_name = from_server.replace("opponent_name$".encode(), "".encode())
+            lbl_opponent_name["text"] = "Opponent: " + opponent_name.decode() 
             top_frame.pack()
             middle_frame.pack()
 
@@ -225,10 +225,10 @@ def receive_message_from_server(sck, m):
             lbl_welcome.config(state=tk.DISABLED)
             lbl_line_server.config(state=tk.DISABLED)
 
-        elif from_server.startswith("$opponent_choice"):
+        elif from_server.startswith("$opponent_choice".encode()):
             # get the opponent choice from the server
-            opponent_choice = from_server.replace("$opponent_choice", "")
-
+            opponent_choice = from_server.replace("$opponent_choice".encode(), "".encode())
+            opponent_choice = opponent_choice.decode() 
             # figure out who wins in this round
             who_wins = game_logic(your_choice, opponent_choice)
             round_result = " "
@@ -242,7 +242,7 @@ def receive_message_from_server(sck, m):
                 round_result = "DRAW"
 
             # Update GUI
-            lbl_opponent_choice["text"] = "Opponent choice: " + opponent_choice
+            lbl_opponent_choice["text"] = "Opponent choice: " + opponent_choice  
             lbl_result["text"] = "Result: " + round_result
 
             # is this the last round e.g. Round 5?
