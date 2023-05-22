@@ -66,6 +66,7 @@ def start_server():
 # Stop server function
 def stop_server():
     global server
+    server.close()
     btnStart.config(state=tk.NORMAL)
     btnStop.config(state=tk.DISABLED)
 
